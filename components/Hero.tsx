@@ -1,23 +1,45 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, Terminal, Zap, Cpu, Database, CheckCircle2, Command } from 'lucide-react'
 
+// Simple count-up hook for the latency metric — adds a "live system" feel
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0)
+
+  useEffect(() => {
+    let start: number | null = null
+    let frame: number
+
+    const step = (timestamp: number) => {
+      if (start === null) start = timestamp
+      const progress = Math.min((timestamp - start) / duration, 1)
+      setValue(Math.floor(progress * target))
+      if (progress < 1) frame = requestAnimationFrame(step)
+    }
+
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [target, duration])
+
+  return value
+}
+
 export default function Hero() {
+  const latency = useCountUp(12)
+
   return (
-    <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 selection:bg-indigo-500 selection:text-white">
-      
-      {/* Background Structural Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f015_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f015_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+    <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300 selection:bg-indigo-500 selection:text-white">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* ASYMMETRICAL TWO-COLUMN LAYOUT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
+
           {/* LEFT COLUMN: Human-Engineered Typography & Action */}
           <div className="lg:col-span-5 text-left">
-            
+
             {/* Pill Tag */}
             <motion.div
               initial={{ opacity: 0, x: -15 }}
@@ -40,8 +62,12 @@ export default function Hero() {
             >
               Build LLM pipelines <br />
               <span className="text-slate-500 dark:text-slate-400 font-normal italic">without</span> the <br />
-              <span className="text-indigo-600 dark:text-indigo-400 underline decoration-indigo-500/40 underline-offset-8">
-                spaghetti code.
+              <span className="relative inline-block">
+                <span className="relative z-10 text-indigo-600 dark:text-indigo-400 underline decoration-indigo-500/40 underline-offset-8">
+                  spaghetti code.
+                </span>
+                {/* soft highlight glow behind the accent phrase */}
+                <span className="absolute inset-0 bg-indigo-500/10 blur-xl -z-10" />
               </span>
             </motion.h1>
 
@@ -60,14 +86,16 @@ export default function Hero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6"
             >
               <a
                 href="#pricing"
-                className="px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm transition-all shadow-md shadow-indigo-600/20 active:scale-95 text-center flex items-center justify-center gap-2"
+                className="group relative overflow-hidden px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm transition-all shadow-md shadow-indigo-600/20 hover:shadow-lg hover:shadow-indigo-600/40 active:scale-95 text-center flex items-center justify-center gap-2"
               >
-                <span>Deploy First Workflow</span>
-                <ArrowRight className="w-4 h-4" />
+                {/* shine sweep on hover */}
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <span className="relative">Deploy First Workflow</span>
+                <ArrowRight className="relative w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </a>
               <a
                 href="#playground"
@@ -78,10 +106,32 @@ export default function Hero() {
               </a>
             </motion.div>
 
+            {/* Mini social proof row — trust signal */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex items-center gap-3 mb-8"
+            >
+              <div className="flex -space-x-2">
+                {['bg-indigo-500', 'bg-purple-500', 'bg-emerald-500', 'bg-amber-500'].map((color, i) => (
+                  <div
+                    key={i}
+                    className={`w-6 h-6 rounded-full ${color} border-2 border-slate-50 dark:border-slate-950`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Trusted by <span className="text-slate-900 dark:text-slate-200 font-bold">500+</span> engineering teams
+              </span>
+            </motion.div>
+
             {/* Tech Metrics */}
             <div className="pt-6 border-t border-slate-200 dark:border-slate-900 grid grid-cols-2 gap-4 text-left font-mono text-xs text-slate-500 dark:text-slate-400">
               <div>
-                <span className="text-slate-900 dark:text-slate-200 font-bold block text-sm">&lt;12ms</span>
+                <span className="text-slate-900 dark:text-slate-200 font-bold block text-sm">
+                  &lt;{latency}ms
+                </span>
                 Average Node Latency
               </div>
               <div>
@@ -100,9 +150,15 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 rounded-2xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-300/80 dark:border-slate-800/80 backdrop-blur-xl shadow-2xl"
             >
-              
+
               {/* BENTO CARD 1: Large Main Canvas */}
-              <div className="sm:col-span-2 p-5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 group hover:border-indigo-400 dark:hover:border-slate-700 transition-all shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.35 }}
+                whileHover={{ y: -3 }}
+                className="sm:col-span-2 p-5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 group hover:border-indigo-400 dark:hover:border-slate-700 transition-all shadow-sm hover:shadow-lg"
+              >
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-900">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-800" />
@@ -111,7 +167,11 @@ export default function Hero() {
                     <span className="ml-2 font-mono text-xs text-slate-400">active_pipeline.json</span>
                   </div>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">
-                    <CheckCircle2 className="w-3 h-3" /> Executed (240ms)
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                    Executed (240ms)
                   </span>
                 </div>
 
@@ -136,16 +196,22 @@ export default function Hero() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* BENTO CARD 2: Left Small Box */}
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 group hover:border-purple-500/50 transition-all flex flex-col justify-between shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+                whileHover={{ y: -3 }}
+                className="p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 group hover:border-purple-500/50 transition-all flex flex-col justify-between shadow-sm hover:shadow-lg"
+              >
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-mono text-[10px] uppercase font-bold">
                       02 Agent Node
                     </span>
-                    <Cpu className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+                    <Cpu className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:scale-110 group-hover:rotate-6 transition-transform" />
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-slate-200 mb-1">Reasoning Engine</h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-4">
@@ -154,18 +220,27 @@ export default function Hero() {
                 </div>
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-900 flex items-center justify-between font-mono text-[10px] text-slate-500">
                   <span>Temperature: 0.2</span>
-                  <span className="text-purple-600 dark:text-purple-400 font-bold">Active</span>
+                  <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                    Active
+                  </span>
                 </div>
-              </div>
+              </motion.div>
 
               {/* BENTO CARD 3: Right Small Box */}
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 group hover:border-emerald-500/50 transition-all flex flex-col justify-between shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.55 }}
+                whileHover={{ y: -3 }}
+                className="p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 group hover:border-emerald-500/50 transition-all flex flex-col justify-between shadow-sm hover:shadow-lg"
+              >
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] uppercase font-bold">
                       03 Storage Node
                     </span>
-                    <Database className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <Database className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 group-hover:rotate-6 transition-transform" />
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-slate-200 mb-1">Vector DB Sync</h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-4">
@@ -174,9 +249,12 @@ export default function Hero() {
                 </div>
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-900 flex items-center justify-between font-mono text-[10px] text-slate-500">
                   <span>Upsert: 1k Embeddings</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">Synced</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Synced
+                  </span>
                 </div>
-              </div>
+              </motion.div>
 
             </motion.div>
           </div>

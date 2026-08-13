@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Check, Zap, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, Zap, Sparkles, Code2, Building2 } from 'lucide-react'
 
 const PLANS = [
   {
@@ -11,6 +11,8 @@ const PLANS = [
     desc: 'For solo devs and side projects building prototypes.',
     monthlyPrice: 0,
     yearlyPrice: 0,
+    icon: Code2,
+    popular: false,
     features: [
       'Up to 3 active agent workflows',
       '1,000 edge executions/mo',
@@ -25,6 +27,8 @@ const PLANS = [
     desc: 'For high-growth teams scaling production workflows.',
     monthlyPrice: 29,
     yearlyPrice: 24,
+    icon: Zap,
+    popular: true,
     features: [
       'Unlimited active agent workflows',
       '100,000 edge executions/mo',
@@ -41,6 +45,8 @@ const PLANS = [
     desc: 'Dedicated infrastructure with custom SLA guarantees.',
     monthlyPrice: 99,
     yearlyPrice: 85,
+    icon: Building2,
+    popular: false,
     features: [
       'Custom monthly execution limits',
       'Dedicated Wasm edge nodes',
@@ -58,9 +64,10 @@ export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState('pro')
 
   return (
-    <section id="pricing" className="py-24 bg-slate-50 dark:bg-slate-950 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+    <section id="pricing" className="relative py-24 transition-colors overflow-hidden">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400 font-semibold tracking-wider uppercase">
@@ -99,35 +106,60 @@ export default function Pricing() {
 
         {/* Pricing Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
-          {PLANS.map((plan) => {
+          {PLANS.map((plan, index) => {
             const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice
             const isSelected = selectedPlan === plan.id
+            const Icon = plan.icon
+            const savedPerYear = (plan.monthlyPrice - plan.yearlyPrice) * 12
 
             return (
-              <div
+              <motion.div
                 key={plan.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ y: plan.popular ? -8 : -4 }}
                 onClick={() => setSelectedPlan(plan.id)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && setSelectedPlan(plan.id)}
-                className={`relative rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 cursor-pointer select-none active:scale-[0.99] ${
-                  isSelected
-                    ? 'bg-white dark:bg-slate-900 border-2 border-indigo-500 shadow-2xl shadow-indigo-500/15 ring-4 ring-indigo-500/10 scale-100 md:-translate-y-2'
+                className={`relative rounded-2xl p-6 flex flex-col justify-between transition-colors duration-300 cursor-pointer select-none active:scale-[0.99] ${
+                  plan.popular
+                    ? 'bg-white dark:bg-slate-900 border-2 border-indigo-500 shadow-2xl shadow-indigo-500/20 md:-translate-y-2'
+                    : isSelected
+                    ? 'bg-white dark:bg-slate-900 border-2 border-indigo-400/60 shadow-lg'
                     : 'bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-900'
                 }`}
               >
-                {/* Active / Most Popular Badge */}
-                {isSelected && (
+                {/* Most Popular Badge — fixed to the Pro plan, always visible */}
+                {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-indigo-600 text-white text-[11px] font-mono font-bold tracking-wider uppercase shadow-md flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Selected Plan
+                    <Sparkles className="w-3 h-3" /> Most Popular
+                  </div>
+                )}
+
+                {/* Selected checkmark — separate from popularity, shows user's actual pick */}
+                {isSelected && !plan.popular && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-mono font-bold tracking-wider uppercase shadow-md flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Selected
                   </div>
                 )}
 
                 <div>
-                  {/* Card Title & Desc */}
+                  {/* Icon + Title & Desc */}
                   <div className="mb-6 pt-2">
+                    <div
+                      className={`inline-flex p-2 rounded-lg border mb-3 transition-colors ${
+                        isSelected || plan.popular
+                          ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400'
+                          : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </div>
                     <h3 className={`text-lg font-bold mb-1 transition-colors ${
-                      isSelected ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'
+                      isSelected || plan.popular ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'
                     }`}>
                       {plan.name}
                     </h3>
@@ -136,17 +168,30 @@ export default function Pricing() {
                     </p>
                   </div>
 
-                  {/* Price Display */}
+                  {/* Price Display — animated crossfade on toggle */}
                   <div className="mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-slate-900 dark:text-white">
-                        ${price}
-                      </span>
+                    <div className="flex items-baseline gap-1 h-10">
+                      <span className="text-4xl font-black text-slate-900 dark:text-white">$</span>
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={`${plan.id}-${price}`}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-4xl font-black text-slate-900 dark:text-white"
+                        >
+                          {price}
+                        </motion.span>
+                      </AnimatePresence>
                       <span className="text-xs font-mono text-slate-500">/month</span>
                     </div>
                     {isYearly && price > 0 && (
                       <span className="text-[10px] font-mono text-slate-400 block mt-1">
                         Billed annually (${price * 12}/yr)
+                        {savedPerYear > 0 && (
+                          <span className="text-emerald-500 font-semibold"> · Save ${savedPerYear}/yr</span>
+                        )}
                       </span>
                     )}
                   </div>
@@ -155,7 +200,7 @@ export default function Pricing() {
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300">
-                        <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`} />
+                        <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isSelected || plan.popular ? 'text-indigo-500' : 'text-slate-400'}`} />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -169,7 +214,7 @@ export default function Pricing() {
                     setSelectedPlan(plan.id)
                   }}
                   className={`w-full py-3 rounded-xl font-semibold text-xs transition-all text-center flex items-center justify-center gap-2 cursor-pointer ${
-                    isSelected
+                    plan.popular
                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/25'
                       : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white'
                   }`}
@@ -178,7 +223,7 @@ export default function Pricing() {
                   <span>{plan.cta}</span>
                 </button>
 
-              </div>
+              </motion.div>
             )
           })}
         </div>

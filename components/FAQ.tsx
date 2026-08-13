@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, HelpCircle } from 'lucide-react'
+import { ChevronDown, HelpCircle, MessageCircle } from 'lucide-react'
 
 const FAQS = [
   {
@@ -35,11 +35,18 @@ export default function FAQ() {
   }
 
   return (
-    <section id="faq" className="py-24 relative overflow-hidden">
+    <section id="faq" className="relative py-24 overflow-hidden">
+
       <div className="max-w-3xl mx-auto px-4 relative z-10">
-        
+
         {/* Header */}
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.4 }}
+          className="text-center mb-16"
+        >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-mono mb-4">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Got Questions?</span>
@@ -50,30 +57,53 @@ export default function FAQ() {
           <p className="text-slate-600 dark:text-slate-400 text-sm">
             Everything you need to know about PulseFlow architecture and pricing.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Clean Accordion */}
+        {/* Clean Accordion — numbered, staggered entrance */}
         <div className="flex flex-col gap-4">
           {FAQS.map((faq, index) => {
             const isOpen = openIndex === index
 
             return (
-              <div
+              <motion.div
                 key={index}
-                className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#070A11]/80 backdrop-blur-md overflow-hidden transition-colors"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+                className={`rounded-2xl border backdrop-blur-md overflow-hidden transition-colors ${
+                  isOpen
+                    ? 'border-indigo-300 dark:border-indigo-500/40 bg-white dark:bg-slate-950/90 shadow-lg shadow-indigo-500/5'
+                    : 'border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-950/80 hover:border-slate-300 dark:hover:border-white/20'
+                }`}
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+                  className="w-full grid grid-cols-[1.75rem_1fr_auto] items-start gap-3 p-6 text-left focus:outline-none cursor-pointer"
                 >
+                  <span
+                    className={`font-mono text-xs mt-1 transition-colors ${
+                      isOpen ? 'text-indigo-500' : 'text-slate-400 dark:text-slate-600'
+                    }`}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                   <span className="text-base font-semibold text-slate-900 dark:text-white">
                     {faq.question}
                   </span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${
-                      isOpen ? 'rotate-180 text-indigo-500' : ''
+                  <div
+                    className={`shrink-0 p-1.5 rounded-full border transition-all duration-300 ${
+                      isOpen
+                        ? 'bg-indigo-500/10 border-indigo-500/30 rotate-180'
+                        : 'border-slate-200 dark:border-white/10'
                     }`}
-                  />
+                  >
+                    <ChevronDown
+                      className={`w-4 h-4 transition-colors ${
+                        isOpen ? 'text-indigo-500' : 'text-slate-400'
+                      }`}
+                    />
+                  </div>
                 </button>
 
                 <AnimatePresence initial={false}>
@@ -84,16 +114,37 @@ export default function FAQ() {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.25, ease: 'easeInOut' }}
                     >
-                      <div className="px-6 pb-6 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-white/5">
-                        {faq.answer}
+                      <div className="grid grid-cols-[1.75rem_1fr_auto] gap-3 px-6 pb-6">
+                        <span />
+                        <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed pt-4 border-t border-slate-100 dark:border-white/5">
+                          {faq.answer}
+                        </div>
+                        <span />
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             )
           })}
         </div>
+
+        {/* Still have questions? — contact footer, keeps visitors from bouncing */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mt-10 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+        >
+          <MessageCircle className="w-3.5 h-3.5" />
+          <span>
+            Still have questions?{' '}
+            <a href="#" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+              Chat with our team
+            </a>
+          </span>
+        </motion.div>
 
       </div>
     </section>

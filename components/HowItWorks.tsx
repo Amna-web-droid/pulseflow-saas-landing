@@ -45,7 +45,7 @@ export default function HowItWorks() {
   return (
     <section id="how-it-works" className="py-28 relative overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <motion.div 
@@ -71,9 +71,15 @@ export default function HowItWorks() {
 
         {/* Interactive Steps */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
-          {/* Left Navigation */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
+
+          {/* Left Navigation — subtle fade-in on scroll, consistent with other sections */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-5 flex flex-col gap-4"
+          >
             {STEPS.map((step, index) => {
               const Icon = step.icon
               const isActive = activeStep === index
@@ -86,7 +92,7 @@ export default function HowItWorks() {
                   whileTap={{ scale: 0.98 }}
                   className={`text-left p-6 rounded-2xl border transition-all duration-300 relative ${
                     isActive
-                      ? 'bg-white/95 dark:bg-[#070A11]/95 border-indigo-500 shadow-xl shadow-indigo-500/10'
+                      ? 'bg-white/95 dark:bg-slate-950/95 border-indigo-500 shadow-xl shadow-indigo-500/10'
                       : 'bg-white/40 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20'
                   }`}
                 >
@@ -114,11 +120,17 @@ export default function HowItWorks() {
                 </motion.button>
               )
             })}
-          </div>
+          </motion.div>
 
-          {/* Right Column Terminal with Animated Code Switch */}
-          <div className="lg:col-span-7">
-            <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-[#070A11] p-6 shadow-2xl font-mono text-xs text-left relative overflow-hidden">
+          {/* Right Column Terminal — subtle fade-in on scroll, consistent with other sections */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="lg:col-span-7"
+          >
+            <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-950 p-6 shadow-2xl font-mono text-xs text-left relative overflow-hidden">
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-rose-500/80" />
@@ -152,7 +164,7 @@ export default function HowItWorks() {
                 <span>Sub-10ms Edge Runtime</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
         </div>
 

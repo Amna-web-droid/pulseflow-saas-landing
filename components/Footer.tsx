@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Zap, Code2, Globe, Share2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Zap, Code2, Globe, Share2, ArrowUp } from 'lucide-react'
 
 const FOOTER_LINKS = [
   {
@@ -34,12 +35,22 @@ const FOOTER_LINKS = [
 ]
 
 export default function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <footer className="border-t border-slate-200 dark:border-white/10 relative z-10 pt-16 pb-12">
-      <div className="max-w-5xl mx-auto px-4">
-        
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-5xl mx-auto px-4"
+      >
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-200/60 dark:border-white/5">
-          
+
           {/* Brand Info */}
           <div className="md:col-span-4">
             <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
@@ -96,13 +107,25 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} PulseFlow Inc. All rights reserved.</p>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-[11px]">All Systems Operational</span>
+
+          <div className="flex items-center gap-5">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-mono text-[11px]">All Systems Operational</span>
+            </div>
+
+            <button
+              onClick={scrollToTop}
+              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors font-mono text-[11px] cursor-pointer"
+              aria-label="Back to top"
+            >
+              <span>Back to top</span>
+              <ArrowUp className="w-3 h-3" />
+            </button>
           </div>
         </div>
 
-      </div>
+      </motion.div>
     </footer>
   )
 }
